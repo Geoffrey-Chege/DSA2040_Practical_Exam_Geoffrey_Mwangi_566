@@ -143,7 +143,7 @@ Implemented in `notebooks/Classification_Apriori_Task3.ipynb`:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/<your-username>/<your-repo>.git
+   git clone https://github.com/Geoffrey-Chege/DSA2040_Practical_Exam_Geoffrey_Mwangi_566
    cd <your-repo>
    ```
 
