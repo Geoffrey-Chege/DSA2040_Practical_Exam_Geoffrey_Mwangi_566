@@ -1,0 +1,52 @@
+PRAGMA foreign_keys = ON;
+
+-- Dimension: Time
+CREATE TABLE IF NOT EXISTS TimeDim (
+  time_id     INTEGER PRIMARY KEY AUTOINCREMENT,
+  date        TEXT NOT NULL,           -- ISO 'YYYY-MM-DD'
+  day         INTEGER NOT NULL,
+  month       INTEGER NOT NULL,
+  quarter     INTEGER NOT NULL,
+  year        INTEGER NOT NULL,
+  is_weekend  INTEGER NOT NULL         -- 0 or 1; computed at ETL
+);
+
+-- Dimension: Customer
+CREATE TABLE IF NOT EXISTS CustomerDim (
+  customer_id     INTEGER PRIMARY KEY, -- preserve customer_id from source
+  full_name       TEXT,
+  country         TEXT,
+  city            TEXT,
+  segment         TEXT
+);
+
+-- Dimension: Product
+CREATE TABLE IF NOT EXISTS ProductDim (
+  product_id   INTEGER PRIMARY KEY AUTOINCREMENT,
+  stock_code   TEXT UNIQUE,
+  description  TEXT,
+  category     TEXT,
+  subcategory  TEXT
+);
+
+-- Fact: Sales
+CREATE TABLE IF NOT EXISTS SalesFact (
+  sales_id     INTEGER PRIMARY KEY AUTOINCREMENT,
+  time_id      INTEGER NOT NULL,
+  customer_id  INTEGER NOT NULL,
+  product_id   INTEGER NOT NULL,
+  quantity     INTEGER NOT NULL,
+  unit_price   REAL NOT NULL,
+  total_sales  REAL NOT NULL,
+  invoice_no   TEXT,
+  FOREIGN KEY(time_id)     REFERENCES TimeDim(time_id),
+  FOREIGN KEY(customer_id) REFERENCES CustomerDim(customer_id),
+  FOREIGN KEY(product_id)  REFERENCES ProductDim(product_id)
+);
+
+-- Indexes for OLAP performance
+CREATE INDEX IF NOT EXISTS idx_sales_time      ON SalesFact(time_id);
+CREATE INDEX IF NOT EXISTS idx_sales_customer  ON SalesFact(customer_id);
+CREATE INDEX IF NOT EXISTS idx_sales_product   ON SalesFact(product_id);
+CREATE INDEX IF NOT EXISTS idx_timedate        ON TimeDim(date);
+CREATE INDEX IF NOT EXISTS idx_product_code    ON ProductDim(stock_code);
